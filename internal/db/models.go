@@ -5,16 +5,15 @@
 package db
 
 import (
-	"database/sql"
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Transaction struct {
 	ID          int32
 	Value       int32
 	Type        string
-	Description sql.NullString
-	CreatedAt   time.Time
+	Description pgtype.Text
+	CreatedAt   pgtype.Timestamptz
 }
 
 type User struct {
