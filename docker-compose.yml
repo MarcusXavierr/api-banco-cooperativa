@@ -4,8 +4,8 @@ services:
   api01: &api
     build: .
     environment:
-      HTTP_PORT: 8080
-      DB_PORT: 5432
+      HTTP_PORT: 9997
+      DB_PORT: 15432
     depends_on:
       db:
         condition: service_healthy
@@ -19,8 +19,8 @@ services:
   api02:
     <<: *api
     environment:
-      HTTP_PORT: 8081
-      DB_PORT: 5432
+      HTTP_PORT: 9998
+      DB_PORT: 15432
 
   nginx:
     image: nginx:latest
@@ -43,6 +43,7 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: rinhadb
+      PGPORT: 15432
     volumes:
       - ./.docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       # - ./.docker/posgres/postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
