@@ -2,7 +2,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR (256) NOT NULL,
     credit_limit INTEGER NOT NULL,
-    balance INTEGER DEFAULT 0
+    balance INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE transactions (
