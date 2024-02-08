@@ -13,7 +13,7 @@ services:
       resources:
         limits:
           cpus: '0.15'
-          memory: '100MB'
+          memory: '50MB'
     network_mode: "host"
 
   api02:
@@ -46,20 +46,20 @@ services:
       PGPORT: 15432
     volumes:
       - ./.docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-      # - ./.docker/posgres/postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
+      - ./.docker/postgres/postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
     network_mode: host
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 15s
       timeout: 25s
-    # command:
-    #   [
-    #     "postgres",
-    #     "-c",
-    #     "config_file=/docker-entrypoint-initdb.d/postgresql.conf",
-    #   ]
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/docker-entrypoint-initdb.d/postgresql.conf",
+      ]
     deploy:
       resources:
         limits:
           cpus: '0.9'
-          memory: '300MB'
+          memory: '400MB'
