@@ -7,7 +7,41 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const getLastTenTransactions = `-- name: GetLastTenTransactions :many
+SELECT id, user_id, value, type, description, created_at FROM transactions
+WHERE user_id = $1 LIMIT 10
+`
+
+func (q *Queries) GetLastTenTransactions(ctx context.Context, userID pgtype.Int4) ([]Transaction, error) {
+	rows, err := q.db.Query(ctx, getLastTenTransactions, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transaction
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Value,
+			&i.Type,
+			&i.Description,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getUser = `-- name: GetUser :one
 SELECT id, name, credit_limit, balance FROM users

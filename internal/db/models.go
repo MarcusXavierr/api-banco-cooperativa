@@ -10,6 +10,7 @@ import (
 
 type Transaction struct {
 	ID          int32
+	UserID      pgtype.Int4
 	Value       int32
 	Type        string
 	Description pgtype.Text

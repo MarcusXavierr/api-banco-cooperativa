@@ -7,6 +7,7 @@ CREATE TABLE users (
 
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
     value INTEGER NOT NULL,
     type CHAR(1) NOT NULL,
     description VARCHAR(10),
