@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
 	"github.com/go-chi/chi/v5"
 )
 
-func Initialize() {
+func Initialize(dbConn *db.Queries) {
 	router := chi.NewRouter()
-	// router.Use(middleware.Logger)
 
-	initializeRoutes(router)
+	initializeRoutes(router, dbConn)
 
 	port := os.Getenv("HTTP_PORT")
 	if port == "" {
