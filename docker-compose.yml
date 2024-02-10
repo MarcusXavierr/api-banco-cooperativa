@@ -5,7 +5,11 @@ services:
     build: .
     environment:
       HTTP_PORT: 9997
-      DB_PORT: 15432
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
@@ -20,7 +24,11 @@ services:
     <<: *api
     environment:
       HTTP_PORT: 9998
-      DB_PORT: 15432
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
 
   nginx:
     image: nginx:latest
@@ -40,10 +48,10 @@ services:
     image: postgres
     hostname: db
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: rinhadb
-      PGPORT: 15432
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGPORT: ${DB_PORT}
     volumes:
       - ./.docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./.docker/postgres/postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
