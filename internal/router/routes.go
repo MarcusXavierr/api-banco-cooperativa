@@ -11,20 +11,22 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func initializeRoutes(router *chi.Mux, dbConn *db.Queries) {
-	userService := user.UserService{DBConn: dbConn}
+const UserCtxKey = "user"
+
+func initializeRoutes(router *chi.Mux, dbConn *db.Queries, dbTx user.DBTransactions) {
+	userService := user.UserService{DBConn: dbConn, DBTransactions: dbTx}
 
 	router.Route("/clientes/{id}", func(r chi.Router) {
 		r.Use(func(next http.Handler) http.Handler {
-			return clientesCtx(next, dbConn)
+			return userCtx(next, dbConn)
 		})
 
 		r.Get("/extrato", userService.HandleExtract)
-		r.Post("/transacoes", user.HandleTransaction)
+		r.Post("/transacoes", userService.HandleBalanceMovement)
 	})
 }
 
-func clientesCtx(next http.Handler, dbConn *db.Queries) http.Handler {
+func userCtx(next http.Handler, dbConn *db.Queries) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clienteIDStr := chi.URLParam(r, "id")
 		clienteID, err := strconv.Atoi(clienteIDStr)
@@ -35,10 +37,11 @@ func clientesCtx(next http.Handler, dbConn *db.Queries) http.Handler {
 
 		user, err := dbConn.GetUser(r.Context(), int32(clienteID))
 		if err != nil {
+			log.Printf("Couldn't find user from ID: %s | Error: %v\n", clienteIDStr, err)
 			http.Error(w, http.StatusText(404), 404)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "cliente", &user)
+		ctx := context.WithValue(r.Context(), UserCtxKey, &user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
