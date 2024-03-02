@@ -31,7 +31,7 @@ type transaction struct {
 
 func (u *UserService) HandleExtract(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	user, ok := ctx.Value("cliente").(*db.User)
+	user, ok := ctx.Value("user").(*db.User)
 	if !ok {
 		http.Error(w, http.StatusText(422), 422)
 		return
@@ -54,8 +54,7 @@ func (u *UserService) mountExtractData(ctx context.Context, user *db.User) ([]by
 	}
 
 	transactions := mountTransactions(dbTransactions)
-	// TODO: Depois ver como tratar a formatação de datas pra ficar certinho. Agora tá falando que o ano é 80841
-	extractedAt := time.Now().Format("2024-01-17T02:34:38.543030Z")
+	extractedAt := time.Now().Format("2006-01-02T15:04:05.000000Z")
 
 	extractedData := extractResponse{
 		Balance: balance{
@@ -81,7 +80,7 @@ func mountTransactions(dbTransactions []db.Transaction) []transaction {
 			Value:       int(dbTransaction.Value),
 			Type:        dbTransaction.Type,
 			Description: dbTransaction.Description.String,
-			CreatedAt:   dbTransaction.CreatedAt.Time.Format("2024-01-17T02:34:38.543030Z"),
+			CreatedAt:   dbTransaction.CreatedAt.Time.Format("2006-01-02T15:04:05.000000Z"),
 		})
 	}
 
