@@ -9,14 +9,18 @@ import (
 	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
 	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/router"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 )
 
+const UserCtxKey = "cliente"
+
 func main() {
+	godotenv.Load()
 	pool := createConnectionPool()
 	defer pool.Close()
 
 	queries := db.New(pool)
-	router.Initialize(queries)
+	router.Initialize(queries, pool)
 }
 
 func createConnectionPool() *pgxpool.Pool {
@@ -29,7 +33,7 @@ func createConnectionPool() *pgxpool.Pool {
 	dbHost := os.Getenv("DB_HOST")
 
 	connectionString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", username, password, dbHost, dbPort, dbName)
-	config := connectionString + "?pool_min_conns=4"
+	config := connectionString + "?pool_min_conns=4&pool_max_conns=4"
 	conn, _ := pgxpool.ParseConfig(config)
 
 	pool, err := pgxpool.NewWithConfig(ctx, conn)
