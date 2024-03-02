@@ -48,13 +48,6 @@ func (u UserService) HandleBalanceMovement(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Error communicating with database", 502)
 	}
 
-	// // HACK: to use later
-	// if userBalance.Balance < userBalance.Limit*-1 {
-	// 	log.Println(fmt.Sprintf("ao que parece essa pocilga não tinha pego esse bug óbvio|  operação=%s| saldo=%d | limite=%d |\n", params.Type, userBalance.Balance, userBalance.Limit))
-	// 	http.Error(w, "You're broke", 422)
-	// 	return
-	// }
-
 	writeBalanceMovementResponse(userBalance, w)
 }
 

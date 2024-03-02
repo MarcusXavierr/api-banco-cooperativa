@@ -9,8 +9,7 @@ import (
 )
 
 func (u UserService) movementBalance(params db.InsertBalanceTransactionParams, ctx context.Context) (userBalanceData, error) {
-	// userBalance, err := mountUserNewBalance(params, ctx, u.DBConn)
-	userBalance, err := mountUserNewBalanceAndValidate(params, ctx, u.DBConn)
+	userBalance, err := mountNewBalanceAndValidate(params, ctx, u.DBConn)
 
 	if err != nil {
 		return userBalanceData{}, err
@@ -28,9 +27,8 @@ func (u UserService) movementBalance(params db.InsertBalanceTransactionParams, c
 		return userBalanceData{}, err
 	}
 
-	err = connWithTx.UpdateUserBalance(ctx, db.UpdateUserBalanceParams{Balance: userBalance.Balance, ID: params.UserID.Int32})
-
-	if err != nil {
+	updateBalanceParams := db.UpdateUserBalanceParams{Balance: userBalance.Balance, ID: params.UserID.Int32}
+	if err = connWithTx.UpdateUserBalance(ctx, updateBalanceParams); err != nil {
 		return userBalanceData{}, err
 	}
 
@@ -41,27 +39,7 @@ func (u UserService) movementBalance(params db.InsertBalanceTransactionParams, c
 	return userBalance, nil
 }
 
-func mountUserNewBalance(params db.InsertBalanceTransactionParams, ctx context.Context, conn *db.Queries) (userBalanceData, error) {
-	user, err := conn.GetUser(ctx, params.UserID.Int32)
-	if err != nil {
-		return userBalanceData{}, err
-	}
-	log.Printf("userBalance: %d | ParamsValue: %d \n", user.Balance, params.Value)
-
-	if params.Type == creditType {
-		return userBalanceData{Limit: user.CreditLimit, Balance: user.Balance + params.Value}, nil
-	}
-
-	limitExceeded := (user.Balance-params.Value)*-1 > user.CreditLimit
-
-	if limitExceeded {
-		return userBalanceData{}, limitExceededError
-	}
-
-	return userBalanceData{Limit: user.CreditLimit, Balance: user.Balance - params.Value}, nil
-}
-
-func mountUserNewBalanceAndValidate(params db.InsertBalanceTransactionParams, ctx context.Context, qtx *db.Queries) (userBalanceData, error) {
+func mountNewBalanceAndValidate(params db.InsertBalanceTransactionParams, ctx context.Context, qtx *db.Queries) (userBalanceData, error) {
 	user, err := qtx.GetUser(ctx, params.UserID.Int32)
 	if err != nil {
 		return userBalanceData{}, err
