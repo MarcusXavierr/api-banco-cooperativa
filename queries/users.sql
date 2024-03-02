@@ -2,6 +2,42 @@
 SELECT * FROM users
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserForUpdate :one
+SELECT * FROM users
+WHERE id = $1
+FOR UPDATE
+LIMIT 1;
+
 -- name: GetLastTenTransactions :many
 SELECT * FROM transactions
-WHERE user_id = $1 LIMIT 10;
+WHERE user_id = $1
+ORDER BY id DESC
+LIMIT 10;
+
+-- name: InsertBalanceTransaction :exec
+INSERT INTO transactions (
+    user_id,
+    value,
+    type,
+    description
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4
+);
+
+-- name: IncreaseUserBalance :exec
+UPDATE users
+SET balance = balance + $1
+WHERE id = $2;
+
+-- name: DecreaseUserBalance :exec
+UPDATE users
+SET balance = balance - $1
+WHERE id = $2;
+
+-- name: UpdateUserBalance :exec
+UPDATE users
+SET balance = $1
+WHERE id = $2;
