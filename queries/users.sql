@@ -14,7 +14,7 @@ WHERE user_id = $1
 ORDER BY id DESC
 LIMIT 10;
 
--- name: InsertBalanceTransaction :exec
+-- name: RegisterTransaction :exec
 INSERT INTO transactions (
     user_id,
     value,

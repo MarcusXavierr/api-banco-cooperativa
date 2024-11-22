@@ -4,25 +4,19 @@ import (
 	"context"
 
 	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
-	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 )
 
-type DBTransactions interface {
-	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
-	Begin(ctx context.Context) (pgx.Tx, error)
-}
-
-type dbTransactionInterface interface {
-	Rollback(ctx context.Context) error
-	Commit(ctx context.Context) error
-}
-
 type UserService struct {
-	DBConn         *db.Queries
-	DBTransactions DBTransactions
+	DB *db.DBPool
 }
 
-type userBalanceData struct {
-	Limit   int32 `json:"limite"`
-	Balance int32 `json:"saldo"`
+func GetUser(ctx context.Context) (*db.User, error) {
+	// TODO: Entender se pode dar problema usar esses context
+	user, ok := ctx.Value("user").(*db.User)
+	if !ok {
+		return nil, errors.New("could not get user instance from context")
+	}
+
+	return user, nil
 }

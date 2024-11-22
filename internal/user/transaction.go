@@ -1,19 +1,20 @@
 package user
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
+	"log"
 	"net/http"
 
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/userbalance"
+	"github.com/pkg/errors"
 )
 
-type balanceMovementReq struct {
-	Value       int    `json:"valor"`
-	Type        string `json:"tipo"`
-	Description string `json:"descricao"`
+var (
+	invalidInputError = errors.New("User input is invalid")
+)
+
+type limitExceededError interface {
+	HasExceededLimit() bool
 }
 
 const (
@@ -21,37 +22,32 @@ const (
 	debitType  = "d"
 )
 
-var (
-	limitExceededError = errors.New("Credit Limit exceeded")
-	invalidInputError  = errors.New("User input is invalid")
-)
-
-func (u UserService) HandleBalanceMovement(w http.ResponseWriter, r *http.Request) {
+func (u UserService) HandleTransaction(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	params, err := u.MountBalanceTransactionParams(ctx, r)
+	params, err := u.parseTransactionRequest(r)
+	user, userErr := GetUser(ctx)
 	if err != nil {
-		if errors.Is(invalidInputError, err) {
-			http.Error(w, "Invalid input", 422)
-			return
-		}
-		http.Error(w, "Error mounting CreateTransactionParams", 500)
+		log.Printf("%v\n%v\n", err, userErr)
+		http.Error(w, "Invalid input", 422)
 		return
 	}
 
-	userBalance, err := u.movementBalance(params, ctx)
+	balance, err := userbalance.UserBalanceService{DB: u.DB, CTX: ctx, User: user}.HandleTransaction(params)
+	log.Printf("balance: %v", balance)
 	if err != nil {
-		if errors.Is(limitExceededError, err) {
+		log.Printf("%v+", err)
+		if l, ok := errors.Cause(err).(limitExceededError); ok && l.HasExceededLimit() {
 			http.Error(w, "You're broke", 422)
-			return
+		} else {
+			http.Error(w, "Error communicating with database", 502)
 		}
-
-		http.Error(w, "Error communicating with database", 502)
+		return
 	}
 
-	writeBalanceMovementResponse(userBalance, w)
+	writeBalanceMovementResponse(balance, w)
 }
 
-func writeBalanceMovementResponse(userBalance userBalanceData, w http.ResponseWriter) {
+func writeBalanceMovementResponse(userBalance userbalance.UserFinancialStatus, w http.ResponseWriter) {
 	data, err := json.Marshal(userBalance)
 	if err != nil {
 		http.Error(w, http.StatusText(500), 500)
@@ -59,32 +55,27 @@ func writeBalanceMovementResponse(userBalance userBalanceData, w http.ResponseWr
 	w.Write(data)
 }
 
-func (u UserService) MountBalanceTransactionParams(ctx context.Context, r *http.Request) (db.InsertBalanceTransactionParams, error) {
-	userId, err := getUserID(ctx)
-	if err != nil {
-		return db.InsertBalanceTransactionParams{}, err
+func (u UserService) parseTransactionRequest(r *http.Request) (userbalance.TransactionRequest, error) {
+	var request userbalance.TransactionRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		log.Printf("%v+\n", err)
+		return userbalance.TransactionRequest{}, errors.Wrap(invalidInputError, "Error decoding request body")
 	}
 
-	var response balanceMovementReq
-	if err := json.NewDecoder(r.Body).Decode(&response); err != nil {
-		return db.InsertBalanceTransactionParams{}, invalidInputError
+	if err := validateTransactionRequest(request); err != nil {
+		return userbalance.TransactionRequest{}, errors.Wrap(err, "Error validating request body")
 	}
 
-	if err := validateBalanceMovementReq(response); err != nil {
-		return db.InsertBalanceTransactionParams{}, invalidInputError
-	}
-
-	return db.InsertBalanceTransactionParams{
-		UserID:      pgtype.Int4{Int32: userId, Valid: true},
-		Value:       int32(response.Value),
-		Type:        response.Type,
-		Description: pgtype.Text{String: response.Description, Valid: true},
-	}, nil
+	return request, nil
 }
 
-func validateBalanceMovementReq(response balanceMovementReq) error {
+func validateTransactionRequest(response userbalance.TransactionRequest) error {
 	if response.Type != creditType && response.Type != debitType {
 		return invalidInputError
+	}
+
+	if response.Type == debitType {
+		response.Value = response.Value * -1
 	}
 
 	if len(response.Description) > 10 || len(response.Description) == 0 {

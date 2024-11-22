@@ -18,9 +18,9 @@ DO $$
 BEGIN
 INSERT INTO users (name, credit_limit)
   VALUES
-    ('Paulo Brificado 🇧🇷', 1000 * 100),
-    ('Sujyro Kimimame 🇯🇵', 800 * 100),
-    ('Giuseppe Camole 🇮🇹', 10000 * 100),
-    ('Jalan Bipau 🇮🇳', 100000 * 100),
-    ('Jallim Habbei 🇸🇦', 5000 * 100);
+    ('Paulo 🇧🇷', 1000 * 100),
+    ('Sujyro 🇯🇵', 800 * 100),
+    ('Giuseppe 🇮🇹', 10000 * 100),
+    ('Jalan 🇮🇳', 100000 * 100),
+    ('Jallim 🇸🇦', 5000 * 100);
 END; $$

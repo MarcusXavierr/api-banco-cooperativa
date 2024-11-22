@@ -113,7 +113,7 @@ func (q *Queries) IncreaseUserBalance(ctx context.Context, arg IncreaseUserBalan
 	return err
 }
 
-const insertBalanceTransaction = `-- name: InsertBalanceTransaction :exec
+const registerTransaction = `-- name: InsertBalanceTransaction :exec
 INSERT INTO transactions (
     user_id,
     value,
@@ -127,15 +127,15 @@ INSERT INTO transactions (
 )
 `
 
-type InsertBalanceTransactionParams struct {
+type RegisterTransactionParams struct {
 	UserID      pgtype.Int4
 	Value       int32
 	Type        string
 	Description pgtype.Text
 }
 
-func (q *Queries) InsertBalanceTransaction(ctx context.Context, arg InsertBalanceTransactionParams) error {
-	_, err := q.db.Exec(ctx, insertBalanceTransaction,
+func (q *Queries) RegisterTransaction(ctx context.Context, arg RegisterTransactionParams) error {
+	_, err := q.db.Exec(ctx, registerTransaction,
 		arg.UserID,
 		arg.Value,
 		arg.Type,

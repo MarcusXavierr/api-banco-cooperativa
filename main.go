@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const UserCtxKey = "cliente"
+// const UserCtxKey = "cliente"
 
 func main() {
 	godotenv.Load()
@@ -20,7 +20,7 @@ func main() {
 	defer pool.Close()
 
 	queries := db.New(pool)
-	router.Initialize(queries, pool)
+	router.Initialize(&db.DBPool{Conn: queries, Transactions: pool})
 }
 
 func createConnectionPool() *pgxpool.Pool {

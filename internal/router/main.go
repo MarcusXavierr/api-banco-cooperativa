@@ -7,14 +7,13 @@ import (
 	"os"
 
 	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/user"
 	"github.com/go-chi/chi/v5"
 )
 
-func Initialize(dbConn *db.Queries, dbTx user.DBTransactions) {
+func Initialize(db *db.DBPool) {
 	router := chi.NewRouter()
 
-	initializeRoutes(router, dbConn, dbTx)
+	initializeRoutes(router, db)
 
 	port := os.Getenv("HTTP_PORT")
 	if port == "" {
