@@ -47,6 +47,6 @@ jobs:
       - name: Copy .docker/hml folder to here
         run: cp -r .docker/hml/* .
       - name: Shutdown docker compose
-        run: docker compose down
+        run: docker compose down # Running docker compose now
       - name: Run docker-compose # TODO: Add volumes here to persist data
         run: docker compose up -d
