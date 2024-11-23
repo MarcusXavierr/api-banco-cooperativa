@@ -43,10 +43,10 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Pull docker image
-        run: docker pull dockermarcusxavier/api-banco-cooperativa:latest
+        run: sudo docker pull dockermarcusxavier/api-banco-cooperativa:latest
       - name: Copy .docker/hml folder to here
         run: cp -r .docker/hml/* .
       - name: Shutdown docker compose
-        run: docker compose down # Running docker compose now
+        run: sudo docker compose down # Running docker compose now
       - name: Run docker-compose # TODO: Add volumes here to persist data
-        run: docker compose up -d
+        run: sudo docker compose up -d
