@@ -46,7 +46,7 @@ jobs:
         run: docker pull dockermarcusxavier/api-banco-cooperativa:latest
       - name: Copy .docker/hml folder to here
         run: cp -r .docker/hml/* .
-      - name: Shutdown docker-compose
-        run: docker-compose down
+      - name: Shutdown docker compose
+        run: docker compose down
       - name: Run docker-compose # TODO: Add volumes here to persist data
-        run: docker-compose up -d
+        run: docker compose up -d
