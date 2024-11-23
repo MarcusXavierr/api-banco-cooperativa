@@ -19,6 +19,7 @@ services:
           cpus: '0.15'
           memory: '50MB'
     network_mode: "host"
+    restart: unless-stopped
 
   api02:
     <<: *api
@@ -38,6 +39,7 @@ services:
       - api01
       - api02
     network_mode: "host"
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -47,6 +49,7 @@ services:
   db:
     image: postgres
     hostname: db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
