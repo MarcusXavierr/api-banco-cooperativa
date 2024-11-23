@@ -21,4 +21,10 @@ func initializeRoutes(router *chi.Mux, dbConn *db.DBPool) {
 		r.Get("/extrato", userService.HandleExtract)
 		r.Post("/transacoes", userService.HandleTransaction)
 	})
+
+	router.Route("/teste", func(r chi.Router) {
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("primeiro teste"))
+		})
+	})
 }
