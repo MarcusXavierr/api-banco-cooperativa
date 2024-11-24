@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
+	"github.com/MarcusXavierr/api-banco-cooperativa/internal/db"
 	"github.com/pkg/errors"
 )
 

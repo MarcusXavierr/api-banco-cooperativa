@@ -1,4 +1,4 @@
-module github.com/MarcusXavierr/rinha-de-backend-2024-q1
+module github.com/MarcusXavierr/api-banco-cooperativa
 
 go 1.21.6
 

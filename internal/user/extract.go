@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/userbalance"
+	"github.com/MarcusXavierr/api-banco-cooperativa/internal/userbalance"
 )
 
 func (u *UserService) HandleExtract(w http.ResponseWriter, r *http.Request) {
