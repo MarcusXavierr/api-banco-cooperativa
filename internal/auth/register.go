@@ -6,39 +6,41 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/MarcusXavierr/api-banco-cooperativa/internal/db"
+	"github.com/go-playground/validator/v10"
 )
 
 func (service AuthService) HandleRegister(w http.ResponseWriter, r *http.Request) {
 	conn := service.DB.Conn
-	err := r.ParseForm()
-	if err != nil {
+	var registerRequest struct {
+		Name        string `json:"name" validate:"required"`
+		CreditLimit int32  `json:"credit_limit" validate:"numeric,min=0"`
+		Email       string `json:"email" validate:"required,email"`
+		Senha       string `json:"senha" validate:"required,min=8"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&registerRequest); err != nil {
 		log.Print(err)
-		http.Error(w, "Could not parse form input", 400)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(registerRequest); err != nil {
+		log.Print(err)
+		http.Error(w, "Validation failed\n"+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	hash := sha256.New()
-	hash.Write([]byte(r.PostFormValue("password")))
-
-	credit := r.PostFormValue("credit_limit")
-	if credit == "" {
-		credit = "0"
-	}
-
-	limit, err := strconv.Atoi(credit)
-	if err != nil {
-		log.Print(err)
-		http.Error(w, "credit_limit must be a valid number", 500)
-	}
+	hash.Write([]byte(registerRequest.Senha))
 
 	params := db.CreateUserParams{
-		Email:       r.PostFormValue("email"),
+		Email:       registerRequest.Email,
 		Password:    hex.EncodeToString(hash.Sum(nil)),
-		Name:        r.PostFormValue("name"),
-		CreditLimit: int32(limit),
+		Name:        registerRequest.Name,
+		CreditLimit: registerRequest.CreditLimit,
 	}
 
 	if err := conn.CreateUser(r.Context(), params); err != nil {
@@ -47,7 +49,7 @@ func (service AuthService) HandleRegister(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	user, err := conn.RetrieveUserFromEmail(r.Context(), r.PostFormValue("email"))
+	user, err := conn.RetrieveUserFromEmail(r.Context(), registerRequest.Email)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, "Error retreaving user from database", 500)
@@ -65,6 +67,7 @@ func (service AuthService) HandleRegister(w http.ResponseWriter, r *http.Request
 		"user":  user,
 		"token": "Bearer " + token,
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 

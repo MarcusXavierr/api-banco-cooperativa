@@ -20,6 +20,8 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "SUPER_AGENT=${{ secrets.SUPER_AGENT }}" >> .env
+          echo "JWT_HMAC=${{ secrets.JWT_HMAC }}" >> .env
       - name: Login to Docker Hub
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
@@ -41,6 +43,8 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "SUPER_AGENT=${{ secrets.SUPER_AGENT }}" >> .env
+          echo "JWT_HMAC=${{ secrets.JWT_HMAC }}" >> .env
 
       - name: Pull docker image
         run: sudo docker pull dockermarcusxavier/api-banco-cooperativa:latest
