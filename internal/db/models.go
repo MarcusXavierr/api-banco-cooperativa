@@ -20,6 +20,8 @@ type Transaction struct {
 type User struct {
 	ID          int32
 	Name        string
+	Email       string
+	Password    string
 	CreditLimit int32
 	Balance     int32
 }
