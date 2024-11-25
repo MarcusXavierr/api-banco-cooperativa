@@ -55,7 +55,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
       PGPORT: ${DB_PORT}
-    volumes:
+    volumes: # TODO: Add volumes here to persist data, and add migrations to change the database
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres/postgresql.conf:/docker-entrypoint-initdb.d/postgresql.conf
     network_mode: host

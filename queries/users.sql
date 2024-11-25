@@ -41,3 +41,18 @@ WHERE id = $2;
 UPDATE users
 SET balance = $1
 WHERE id = $2;
+
+-- name: VerifyCredentials :one
+SELECT * FROM users
+WHERE email = $1
+AND password = $2
+LIMIT 1;
+
+-- name: CreateUser :exec
+INSERT INTO users (name, email, password, credit_limit)
+  VALUES ($1, $2, $3, $4);
+
+-- name: RetrieveUserFromEmail :one
+SELECT * FROM users
+WHERE email = $1
+LIMIT 1;

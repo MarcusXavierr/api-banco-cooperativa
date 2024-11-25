@@ -11,6 +11,28 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (name, email, password, credit_limit)
+  VALUES ($1, $2, $3, $4)
+`
+
+type CreateUserParams struct {
+	Name        string
+	Email       string
+	Password    string
+	CreditLimit int32
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+		arg.CreditLimit,
+	)
+	return err
+}
+
 const decreaseUserBalance = `-- name: DecreaseUserBalance :exec
 UPDATE users
 SET balance = balance - $1
@@ -62,7 +84,7 @@ func (q *Queries) GetLastTenTransactions(ctx context.Context, userID pgtype.Int4
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, credit_limit, balance FROM users
+SELECT id, name, email, password, credit_limit, balance FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -72,6 +94,8 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.Email,
+		&i.Password,
 		&i.CreditLimit,
 		&i.Balance,
 	)
@@ -79,7 +103,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT id, name, credit_limit, balance FROM users
+SELECT id, name, email, password, credit_limit, balance FROM users
 WHERE id = $1
 FOR UPDATE
 LIMIT 1
@@ -91,6 +115,8 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, id int32) (User, error) 
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.Email,
+		&i.Password,
 		&i.CreditLimit,
 		&i.Balance,
 	)
@@ -113,7 +139,7 @@ func (q *Queries) IncreaseUserBalance(ctx context.Context, arg IncreaseUserBalan
 	return err
 }
 
-const registerTransaction = `-- name: InsertBalanceTransaction :exec
+const registerTransaction = `-- name: RegisterTransaction :exec
 INSERT INTO transactions (
     user_id,
     value,
@@ -144,6 +170,26 @@ func (q *Queries) RegisterTransaction(ctx context.Context, arg RegisterTransacti
 	return err
 }
 
+const retrieveUserFromEmail = `-- name: RetrieveUserFromEmail :one
+SELECT id, name, email, password, credit_limit, balance FROM users
+WHERE email = $1
+LIMIT 1
+`
+
+func (q *Queries) RetrieveUserFromEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, retrieveUserFromEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.CreditLimit,
+		&i.Balance,
+	)
+	return i, err
+}
+
 const updateUserBalance = `-- name: UpdateUserBalance :exec
 UPDATE users
 SET balance = $1
@@ -158,4 +204,30 @@ type UpdateUserBalanceParams struct {
 func (q *Queries) UpdateUserBalance(ctx context.Context, arg UpdateUserBalanceParams) error {
 	_, err := q.db.Exec(ctx, updateUserBalance, arg.Balance, arg.ID)
 	return err
+}
+
+const verifyCredentials = `-- name: VerifyCredentials :one
+SELECT id, name, email, password, credit_limit, balance FROM users
+WHERE email = $1
+AND password = $2
+LIMIT 1
+`
+
+type VerifyCredentialsParams struct {
+	Email    string
+	Password string
+}
+
+func (q *Queries) VerifyCredentials(ctx context.Context, arg VerifyCredentialsParams) (User, error) {
+	row := q.db.QueryRow(ctx, verifyCredentials, arg.Email, arg.Password)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
+		&i.CreditLimit,
+		&i.Balance,
+	)
+	return i, err
 }

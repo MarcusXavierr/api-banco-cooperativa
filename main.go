@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/db"
-	"github.com/MarcusXavierr/rinha-de-backend-2024-q1/internal/router"
+	"github.com/MarcusXavierr/api-banco-cooperativa/internal/db"
+	"github.com/MarcusXavierr/api-banco-cooperativa/internal/router"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
