@@ -10,6 +10,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
+      SUPER_AGENT: ${SUPER_AGENT}
+      JWT_HMAC: ${JWT_HMAC}
     depends_on:
       db:
         condition: service_healthy
@@ -30,7 +32,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
-
+      SUPER_AGENT: ${SUPER_AGENT}
+      JWT_HMAC: ${JWT_HMAC}
   nginx:
     image: nginx:latest
     volumes:
